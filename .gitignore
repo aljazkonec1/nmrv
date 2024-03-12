@@ -3,6 +3,10 @@
 *.gif
 *.jpeg
 *.svg
+*.zip
+*.tar*
+finsihed_files
+finished_files
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
