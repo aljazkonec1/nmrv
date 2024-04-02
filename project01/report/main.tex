@@ -85,7 +85,7 @@ The lack of motion of the top right background is well estimated as the backgrou
     \label{lk-hs-real}
 \end{figure}
 
-\subsection*{Lucas-Kanade improvement}
+\subsection*{Lucas-Kanade with Harris corner response}
 To better estimate the motion in the image we want to remove estimation on large homogeneous areas, i.e. areas with low gradients.
 We use the Harris corner response to determine areas with edges and corners and only estimate the motion in those areas.
 In Figure \ref{lk-improvement} we present the results of Lucas-Kanade method with Harris response.
@@ -118,9 +118,10 @@ In this case a larger size is a better solution, but in general the window size 
 Horn-Schunck method has two main parameters: the number of iterations $n$ and a regularization parameter $\lambda$ that affects the smoothness of the results.
 The number of iterations $n$ determines how many times the method will iterate to minimize the energy of the flow field.
 To determin a reasonable value $n$ we need to take into account computational expensiveness and the rate of convergence of $n$.
-In this case we use $n=100$ as it provides a good balance between computational expensiveness and convergence.
+To stop unnecessary iterations we also implement a stopping criterion that stops the iterations when the change inthe flow field is smaller than e-8.
 The effect of different number of iterations is shown in Figure \ref{hs-iterations}.
-Most of the difference can be seen in the lowe left corner wher the concentration of the flow vectors is the highest for $n$=100.
+
+% Most of the difference can be seen in the lowe left corner wher the concentration of the flow vectors is the highest for $n$=100.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{HS_iter.pdf}
@@ -146,12 +147,11 @@ As $\lambda$ increases the flow field becomes smoother and better represents the
 Implementation of these methods using standard for loops would greatly increase the computational time.
 We use matrix operations and convolution to efficiently compute the optical flow fields.
 In Table \ref{speed} we present the time it takes to compute the optical flow fields for both methods.
-The Lucas-Kanade method is faster than the Horn-Schunck method as it uses least squares to estimate the motion of the pixels.
-The speed of the Horn-Schunck method is affected by the number of iterations which greatly increases the computational time.
-To showcase how number of iterations affects the speed we present three different number of iterations: 100, 200 and 1000 iterations.
+The Lucas-Kanade method is fasadasd ster than the Horn-Schunck method as it uses least squares to estimate the motion of the pixels.
+The speed of the Horn-Schunck method is affected by the number of iterations.
+For this reason we set the number of iterations at 10000 with a stopping criterion if the change in the flow field is smaller than e-8.
 In the last row of Table \ref{speed} we show the speed of the Horn-Schunck method with Lucas-Kanade initialization.
-This reduces computational time as the initial flow field is already estimated by the Lucas-Kanade method.
-For this reason we set the number of iterations to 10 and still get a good final result.
+Using the Lucas-Kanade initialization drops the computation time by 24\% down from an average speed of 16.3s to 12.4s.
 \begin{table}[H]
     \centering
     \begin{tabular}{|c|c|}
@@ -159,10 +159,8 @@ For this reason we set the number of iterations to 10 and still get a good final
         Method & Time (s) \\
         \hline
         Lucas-Kanade & 0.01 \\
-        Horn-Schunck (100) & 0.11 \\
-        Horn-Schunck (200) & 0.19 \\
-        Horn-Schunck (1000) & 0.51 \\
-        Horn-Schunck (LK initialization) & 0.03 \\
+        Horn-Schunck & 16.3 \\
+        Horn-Schunck (LK initialization) & 12.4 \\
         \hline
     \end{tabular}
     \caption{Computation times for Lucas-Kanade and Horn-Schunck methods.}

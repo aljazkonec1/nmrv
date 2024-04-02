@@ -3,8 +3,9 @@ import cv2
 import ex1_utils as utils
 import matplotlib.pyplot as plt
 import time
+
 def better_derivatives(im1, im2):
-    Dx1, Dy1 = utils.gaussderiv(np.float64(im1), 1.5)
+    Dx1, Dy1 = utils.gaussderiv(np.float64(im1), 1.5 )
     Dx2, Dy2 = utils.gaussderiv(np.float64(im2), 1.5)
 
     Dx = (Dx1 + Dx2)/2
@@ -29,15 +30,16 @@ def lucas_kanade(im1, im2, N, harris=False, threshold_harris=100):
     DyDT_sum = cv2.filter2D(np.multiply(Dy,Dt), -1, kernel)
 
     D = np.multiply(Dx2_sum, Dy2_sum) - np.power(DxDy_sum, 2)
+    D[D==0] = 1e-8
 
     U = -(Dy2_sum * DxDT_sum - DxDy_sum * DyDT_sum) / D
     V = -(Dx2_sum * DyDT_sum - DxDy_sum * DxDT_sum) / D
 
     if harris:
         
-        Sx2 = utils.gausssmooth(Dx2, 0.5)
-        Sy2 = utils.gausssmooth(Dy2, 0.5)
-        Sxy = utils.gausssmooth(DxDy, 0.5)
+        Sx2 = utils.gausssmooth(Dx2, 1.5)
+        Sy2 = utils.gausssmooth(Dy2, 1.5)
+        Sxy = utils.gausssmooth(DxDy, 1.5)
         # Sx2 = Dx2
         # Sy2 = Dy2
         # Sxy = DxDy
@@ -63,21 +65,31 @@ def lucas_kanade(im1, im2, N, harris=False, threshold_harris=100):
 def horn_schunck(im1, im2, n_iters, lbbd):
     U = np.zeros(im1.shape)
     V = np.zeros(im1.shape)
-    # U, V = lucas_kanade(im1, im2, 3, harris=True)
+    U, V = lucas_kanade(im1, im2, 3)
 
     Dx, Dy, Dt = better_derivatives(im1, im2)
+    Dt = utils.gausssmooth( im2 - im1, 1.5)
+
 
     L_d = np.array([[0, 0.25, 0], [0.25, 0, 0.25], [0, 0.25, 0]])
 
     P = Dt
     D = np.power(Dx, 2) + np.power(Dy, 2) + lbbd
+    D[D==0] = 1e-8
 
     for i in range(n_iters):
         ua = cv2.filter2D(U, -1, L_d)
         va = cv2.filter2D(V, -1, L_d)
         
         P = Dt + Dx * ua + Dy * va
-        print(np.max(U - (ua - Dx * (P/D))))
+
+        U_new = ua - Dx * (P/D)
+
+        if np.linalg.norm(U - U_new) < 1e-8:
+            print( np.linalg.norm(U - U_new))
+            print("Converged")
+            return U, V
+        
 
         U = ua - Dx * (P/D)
         V = va - Dy * (P/D)
@@ -95,19 +107,25 @@ if __name__ == "__main__":
     # im2 = im1.copy()
     # im2 = utils.rotate_image( im2, -1)
     # times_Lk = []
-    # times_hs = []
-    # for i in range(100):
+    # for i in range(500):
     #     print(i)
     #     t = time.time()
-    #     U_lk , V_lk = horn_schunck(im1 , im2 , 10 , 2 )
+    #     U_lk , V_lk = lucas_kanade( im1 , im2 , 3, harris=False)
     #     times_Lk.append(np.round(time.time() - t, 3))
-
-
+        
+    times_hs = []
+    for i in range(10):
+        print(i)
+        t = time.time()
+        U_hs , V_hs = horn_schunck(im1 , im2 , 10000 , 1 )
+        a = np.round(time.time() - t, 3)
+        print(a)
+        times_hs.append(a)
     
     # print("Lucas-Kanade: ", np.mean(times_Lk))
-    # print("Horn-Schunck: ", np.mean(times_hs))
+    print("Horn-Schunck: ", np.mean(times_hs))
                      
-    U_lk , V_lk = horn_schunck(im1 , im2 , 100 , 2 )
+    # U_lk , V_lk = horn_schunck(im1 , im2 , 100 , 2 )
 
     # fig1 , ( ( ax1_11 , ax1_12 ) , ( ax1_21 , ax1_22 ) ) = plt.subplots ( 2 , 2 )
     # ax1_11.imshow(im1, cmap='gray')
