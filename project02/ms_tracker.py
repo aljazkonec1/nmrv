@@ -6,11 +6,16 @@ from ex2_utils import get_patch, create_epanechnik_kernel, extract_histogram, ba
 import ex1_utils
 
 class MSParams():
-    def __init__(self):
-        self.enlarge_factor = 1.5
-        self.kernel_size = 15
-        self.n_bins = 16
-        self.alpha = 0.05
+    def __init__(self, kernel_size=15, n_bins=16, alpha=0.01, eps= 1e-7):
+        self.kernel_size = kernel_size
+        self.n_bins = n_bins    
+        self.alpha = alpha
+        self.eps = eps
+        # print(self.kernel_size)
+        # print(self.n_bins)
+        # print(self.alpha)
+
+
 
 
 class MeanShiftTracker(Tracker):
@@ -50,7 +55,7 @@ class MeanShiftTracker(Tracker):
             y_ = np.array(region[1::2])
             region = [np.min(x_), np.min(y_), np.max(x_) - np.min(x_) + 1, np.max(y_) - np.min(y_) + 1]
         
-        self.window = max(region[2], region[3]) * self.parameters.enlarge_factor
+        # self.window = max(region[2], region[3]) * self.parameters.enlarge_factor
         
         x0, y0, x1, y1 = self.tl_br(region, image.shape)
 
@@ -77,7 +82,7 @@ class MeanShiftTracker(Tracker):
         position_array = [[x_k, y_k]]
         
         idx = 1
-        while min_distance >= 0.001 and idx < 50:
+        while min_distance >= 0.2 and idx < 50:
             idx = 1 + idx
 
             patch = get_patch(image, (x_k, y_k), (h, h))
@@ -122,14 +127,14 @@ class MeanShiftTracker(Tracker):
         yi = yi.T
 
         idx = 1
-        while min_distance >= 0.001 and idx<50:
+        while min_distance >= 0.2 and idx<50:
             idx = 1 + idx
 
             #to get weights
             nf = get_patch(image, (x_k, y_k), self.size)[0]
             p = extract_histogram(nf, self.parameters.n_bins, self.weights[0:nf.shape[0], 0:nf.shape[1]])
             p = self.nc * p / (self.parameters.n_bins** 3)
-            v = np.sqrt(np.divide(self.q, p + 1e-10))
+            v = np.sqrt(np.divide(self.q, p + self.parameters.eps))
             wi = backproject_histogram(nf, v, self.parameters.n_bins)
             w = np.sum(wi)
 
@@ -140,6 +145,7 @@ class MeanShiftTracker(Tracker):
             y_k = y_k + y_shift
 
             min_distance = np.sqrt((x_shift)**2 + (y_shift)**2)
+
             position_array.append([x_k, y_k])
 
         # update model
