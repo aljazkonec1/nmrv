@@ -11,9 +11,6 @@ class MSParams():
         self.n_bins = n_bins    
         self.alpha = alpha
         self.eps = eps
-        # print(self.kernel_size)
-        # print(self.n_bins)
-        # print(self.alpha)
 
 
 
