@@ -5,6 +5,10 @@
 *.svg
 *.zip
 *.tar*
+vot14/
+vot15/
+seq/
+
 finsihed_files
 finished_files
 *vot14**
