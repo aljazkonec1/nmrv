@@ -1,0 +1,20 @@
+[
+    {
+        "Model": "Random Walk",
+        "Overlap": 0.51,
+        "Failures": 30,
+        "FPS": 87
+    },
+    {
+        "Model": "NCV",
+        "Overlap": 0.52,
+        "Failures": 37,
+        "FPS": 83
+    },
+    {
+        "Model": "NCA",
+        "Overlap": 0.55,
+        "Failures": 182,
+        "FPS": 82
+    }
+]

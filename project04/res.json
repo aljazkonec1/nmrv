@@ -1,0 +1,28 @@
+[
+    {
+        "Particles": 50,
+        "Overlap": 0.51,
+        "Failures": 41,
+        "FPS": 161
+    },
+    {
+    "Particles": 100,
+    "Overlap": 0.52,
+    "Failures": 37,
+    "FPS": 83
+    },
+    {
+        "Particles": 200,
+        "Overlap": 0.51,
+        "Failures": 34,
+        "FPS": 41
+    },
+    {
+        "Particles": 500,
+        "Overlap": 0.52,
+        "Failures": 36,
+        "FPS": 17
+    }
+
+
+]
