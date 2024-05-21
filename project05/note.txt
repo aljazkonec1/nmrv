@@ -1,0 +1,1 @@
+To use the longterm-tracker, simply replace the siamfc.py file with the provided one and set longterm=True in run_tracker

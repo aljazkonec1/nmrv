@@ -8,6 +8,9 @@
 vot14/
 vot15/
 seq/
+project05/data/
+*.pth
+project05/results*
 
 finsihed_files
 finished_files
